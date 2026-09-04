@@ -1,0 +1,105 @@
+{
+  "modelType": "Gaussian Naive Bayes",
+  "trainingRows": 25500,
+  "sourceDataset": "dirty_v3_path.csv",
+  "classes": {
+    "Arthritis": {
+      "prior": 0.07043137254901961,
+      "numeric": {
+        "age": { "mean": 59.80679287305122, "variance": 710.369686596297 },
+        "glucose": { "mean": 83.50140311804016, "variance": 1541.1387246459471 },
+        "bloodPressure": { "mean": 116.31670378619147, "variance": 2398.1219517185255 },
+        "bmi": { "mean": 26.918090200445373, "variance": 25.091335717924267 },
+        "oxygenSaturation": { "mean": 96.06115812917596, "variance": 8.845184850260921 },
+        "lengthOfStay": { "mean": 3.4771714922048997, "variance": 1.2505924449779524 },
+        "cholesterol": { "mean": 209.7063084632516, "variance": 650.461793332528 },
+        "triglycerides": { "mean": 169.56919821826256, "variance": 1250.0541058160488 }
+      },
+      "gender": { "male": 0.4191217342968316, "female": 0.4324624791550862, "other": 0.14841578654808227 }
+    },
+    "Asthma": {
+      "prior": 0.07988235294117647,
+      "numeric": {
+        "age": { "mean": 29.245459008345605, "variance": 315.30352012559024 },
+        "glucose": { "mean": 84.44638684339702, "variance": 1407.30449190338 },
+        "bloodPressure": { "mean": 105.14792832596963, "variance": 2252.3620625712174 },
+        "bmi": { "mean": 25.044585174275923, "variance": 15.746424042450144 },
+        "oxygenSaturation": { "mean": 90.01048109965616, "variance": 35.213506494161265 },
+        "lengthOfStay": { "mean": 3.9734904270986746, "variance": 2.031697831646209 },
+        "cholesterol": { "mean": 200.93802650957215, "variance": 644.1356837836429 },
+        "triglycerides": { "mean": 160.60744231713315, "variance": 878.3446423045789 }
+      },
+      "gender": { "male": 0.4161764705882353, "female": 0.4372549019607843, "other": 0.1465686274509804 }
+    },
+    "Cancer": {
+      "prior": 0.048392156862745096,
+      "numeric": {
+        "age": { "mean": 46.216369529983794, "variance": 585.6363284728477 },
+        "glucose": { "mean": 91.56559157212322, "variance": 1978.680807470122 },
+        "bloodPressure": { "mean": 111.64738249594828, "variance": 2354.481993229705 },
+        "bmi": { "mean": 26.025729335494354, "variance": 15.56868394942967 },
+        "oxygenSaturation": { "mean": 92.97897082658022, "variance": 24.187654451343406 },
+        "lengthOfStay": { "mean": 12.956239870340356, "variance": 13.651245504860924 },
+        "cholesterol": { "mean": 215.19598055105314, "variance": 604.0158274422065 },
+        "triglycerides": { "mean": 170.9745380875199, "variance": 1736.3757738953936 }
+      },
+      "gender": { "male": 0.4260307194826192, "female": 0.42279708973322555, "other": 0.15117219078415522 }
+    },
+    "Diabetes": {
+      "prior": 0.2516470588235294,
+      "numeric": {
+        "age": { "mean": 48.14991429016674, "variance": 518.0778841285432 },
+        "glucose": { "mean": 153.44261337073357, "variance": 5473.676512244849 },
+        "bloodPressure": { "mean": 119.96861617578342, "variance": 2584.6089984901555 },
+        "bmi": { "mean": 29.09229390681011, "variance": 25.378587070856724 },
+        "oxygenSaturation": { "mean": 94.96786504597175, "variance": 8.770765459126778 },
+        "lengthOfStay": { "mean": 5.518154901044102, "variance": 2.9266222462253957 },
+        "cholesterol": { "mean": 209.72949509116398, "variance": 902.0249606612997 },
+        "triglycerides": { "mean": 179.23304036153954, "variance": 1619.9025106409754 }
+      },
+      "gender": { "male": 0.4277258566978193, "female": 0.4294392523364486, "other": 0.1428348909657321 }
+    },
+    "Healthy": {
+      "prior": 0.1191764705882353,
+      "numeric": {
+        "age": { "mean": 37.04146100691017, "variance": 431.49811645710065 },
+        "glucose": { "mean": 80.88012833168806, "variance": 1303.5335897498908 },
+        "bloodPressure": { "mean": 101.40630470549512, "variance": 1976.9273823632775 },
+        "bmi": { "mean": 23.89282329713729, "variance": 16.33755425340553 },
+        "oxygenSaturation": { "mean": 96.95878907535379, "variance": 3.952470070327763 },
+        "lengthOfStay": { "mean": 1.4919381375452452, "variance": 0.24993500637376043 },
+        "cholesterol": { "mean": 179.1506482395523, "variance": 406.54995301847157 },
+        "triglycerides": { "mean": 129.7203455083911, "variance": 381.2361683241543 }
+      },
+      "gender": { "male": 0.41321499013806706, "female": 0.435568704799474, "other": 0.15121630506245892 }
+    },
+    "Hypertension": {
+      "prior": 0.2792156862745098,
+      "numeric": {
+        "age": { "mean": 54.91151685393258, "variance": 647.0539684856712 },
+        "glucose": { "mean": 93.87878089887634, "variance": 1844.0862230924322 },
+        "bloodPressure": { "mean": 136.10466853932616, "variance": 3603.192656631614 },
+        "bmi": { "mean": 28.055370786516875, "variance": 15.966109047912255 },
+        "oxygenSaturation": { "mean": 94.98628370786491, "variance": 8.860759560006045 },
+        "lengthOfStay": { "mean": 4.006460674157303, "variance": 2.0069807315995476 },
+        "cholesterol": { "mean": 230.43936376404537, "variance": 1237.2963932046623 },
+        "triglycerides": { "mean": 189.22255758426934, "variance": 2497.236652321262 }
+      },
+      "gender": { "male": 0.4258037343815808, "female": 0.4298750526463569, "other": 0.14432121297206232 }
+    },
+    "Obesity": {
+      "prior": 0.1512549019607843,
+      "numeric": {
+        "age": { "mean": 38.388903292714545, "variance": 354.7873075086668 },
+        "glucose": { "mean": 90.57366865439457, "variance": 1525.5793449801877 },
+        "bloodPressure": { "mean": 114.018778843661, "variance": 2548.624781267412 },
+        "bmi": { "mean": 35.15289084780929, "variance": 35.95078497978102 },
+        "oxygenSaturation": { "mean": 95.99824993518257, "variance": 9.094615008340043 },
+        "lengthOfStay": { "mean": 3.511278195488722, "variance": 1.2522062220628047 },
+        "cholesterol": { "mean": 220.60210785584675, "variance": 906.3479481366594 },
+        "triglycerides": { "mean": 201.4297848068447, "variance": 3717.138335006821 }
+      },
+      "gender": { "male": 0.41865284974093264, "female": 0.41476683937823833, "other": 0.166580310880829 }
+    }
+  }
+}

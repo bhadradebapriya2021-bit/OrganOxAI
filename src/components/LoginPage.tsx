@@ -10,14 +10,16 @@ import {
   Lock, 
   CheckCircle2, 
   Hospital, 
-  Sparkles
+  Sparkles,
+  FlaskConical
 } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (user: AuthUser, selectedPatient?: PatientData) => void;
+  onOpenModelTesting: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onOpenModelTesting }) => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('doctor');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -112,7 +114,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <div className="w-full max-w-4xl bg-white border border-[#D4D8D5] rounded-2xl shadow-sm overflow-hidden flex flex-col">
           
           {/* Portal Selector Category Tabs */}
-          <div className="grid grid-cols-2 border-b border-[#D4D8D5] bg-[#EDEFEE]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 border-b border-[#D4D8D5] bg-[#EDEFEE]">
             <button
               type="button"
               onClick={() => setSelectedRole('doctor')}
@@ -161,6 +163,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               {selectedRole === 'patient' && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#D08856]" />
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={onOpenModelTesting}
+              className="py-4 px-4 sm:px-6 flex items-center justify-center gap-3 transition-all relative cursor-pointer text-[#6F6D68] hover:text-[#41403C] hover:bg-white"
+            >
+              <div className="p-2 rounded-xl bg-[#D4D8D5] text-[#41403C]">
+                <FlaskConical className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <span className="block text-sm sm:text-base font-bold leading-tight text-[#41403C]">
+                  ML Model Testing
+                </span>
+                <span className="text-[11px] font-normal text-[#6F6D68] block">
+                  Predictions &amp; AI Interpretation
+                </span>
+              </div>
             </button>
           </div>
 

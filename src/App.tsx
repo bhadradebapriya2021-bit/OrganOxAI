@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { ActiveTab, ConditionId, PatientData, AuthUser } from './types';
 import { INITIAL_PATIENT, SAMPLE_PATIENTS } from './data/clinicalData';
 import { LoginPage } from './components/LoginPage';
@@ -21,30 +22,44 @@ import { OrderTestModal } from './components/OrderTestModal';
 import { ReferralModal } from './components/ReferralModal';
 import { NotificationDrawer, ClinicalNotification } from './components/NotificationDrawer';
 import { InfoModal } from './components/InfoModal';
+import { ModelTestingDashboard } from './components/ModelTestingDashboard';
 import { CheckCircle2 } from 'lucide-react';
 
+const TAB_PATHS: Record<ActiveTab, string> = {
+  overview: '/overview',
+  genetic: '/genetic',
+  modifiable: '/modifiable',
+  prevention: '/prevention',
+  'drug-testing': '/drug-testing',
+  input: '/input',
+  reports: '/reports',
+};
+
+const PATH_TABS: Record<string, ActiveTab> = Object.fromEntries(
+  Object.entries(TAB_PATHS).map(([tab, path]) => [path, tab as ActiveTab]),
+) as Record<string, ActiveTab>;
+
 export default function App() {
-  // Authentication State (starts on Login page with Doctor & Patient options)
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
-  // Navigation & View state - every tab opens its own dedicated page
-  const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
-  const [selectedCondition, setSelectedCondition] = useState<ConditionId>('cad');
+  const activeTab = PATH_TABS[location.pathname] ?? 'overview';
+  const setActiveTab = (tab: ActiveTab) => navigate(TAB_PATHS[tab]);
 
-  // Patient Clinical State
+  const [selectedCondition, setSelectedCondition] = useState<ConditionId>('cad');
   const [patient, setPatient] = useState<PatientData>(INITIAL_PATIENT);
 
-  // Modals state
   const [isOrderTestOpen, setIsOrderTestOpen] = useState(false);
-  const [orderTestName, setOrderTestName] = useState<string>('Lipoprotein(a) [Lp(a)] & Lipid Subfraction Assay');
+  const [orderTestName, setOrderTestName] = useState<string>(
+    'Lipoprotein(a) [Lp(a)] & Lipid Subfraction Assay',
+  );
   const [isReferralOpen, setIsReferralOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [infoModalType, setInfoModalType] = useState<'help' | 'privacy' | null>(null);
-
-  // Toast feedback banner
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Notifications State
   const [notifications, setNotifications] = useState<ClinicalNotification[]>([
     {
       id: 'n1',
@@ -82,6 +97,7 @@ export default function App() {
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
+
     setTimeout(() => {
       setToastMessage(null);
     }, 3500);
@@ -89,25 +105,31 @@ export default function App() {
 
   const handleLogin = (user: AuthUser, selectedPatient?: PatientData) => {
     setCurrentUser(user);
+
     if (selectedPatient) {
       setPatient(selectedPatient);
     }
-    setActiveTab('overview');
+
+    navigate('/overview');
     showToast(`Welcome, ${user.name} (${user.role === 'doctor' ? 'Doctor Portal' : 'Patient Portal'})`);
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
-    setActiveTab('overview');
+    navigate('/');
   };
 
   const handleOrderTestTrigger = (testName?: string) => {
-    if (testName) setOrderTestName(testName);
+    if (testName) {
+      setOrderTestName(testName);
+    }
+
     setIsOrderTestOpen(true);
   };
 
   const handleConfirmOrder = (summary: string) => {
     showToast(`Order Confirmed: ${summary}`);
+
     const newNotif: ClinicalNotification = {
       id: 'order-' + Date.now(),
       title: 'Lab Requisition Dispatched',
@@ -116,11 +138,13 @@ export default function App() {
       type: 'success',
       read: false,
     };
+
     setNotifications(prev => [newNotif, ...prev]);
   };
 
   const handleConfirmReferral = (summary: string) => {
     showToast(`Referral Dispatched: ${summary}`);
+
     const newNotif: ClinicalNotification = {
       id: 'ref-' + Date.now(),
       title: 'Genetic Referral Transmitted',
@@ -129,6 +153,7 @@ export default function App() {
       type: 'success',
       read: false,
     };
+
     setNotifications(prev => [newNotif, ...prev]);
   };
 
@@ -139,14 +164,21 @@ export default function App() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // If not logged in, display the Login Page with Doctor and Patient categories
-  if (!currentUser) {
-    return <LoginPage onLogin={handleLogin} />;
+  if (location.pathname === '/model-testing') {
+    return <ModelTestingDashboard onExit={() => navigate('/')} />;
   }
 
-  return (
+  if (!currentUser) {
+    return (
+      <Routes>
+        <Route path="/" element={<LoginPage onLogin={handleLogin} onOpenModelTesting={() => navigate('/model-testing')} />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
+  }
+
+  const dashboard = (
     <div className="min-h-screen bg-[#EDEFEE] text-[#41403C] flex flex-col font-['Roboto',sans-serif] selection:bg-[#F1DDD0] selection:text-[#8A4A1C]">
-      {/* Toast Notification Alert */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 bg-[#41403C] text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-[13px] font-medium animate-in slide-in-from-top duration-200 border border-[#D08856]/40">
           <CheckCircle2 className="w-4 h-4 text-[#D08856]" />
@@ -154,7 +186,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Header */}
       {activeTab !== 'reports' && (
         <Header
           activeTab={activeTab}
@@ -169,7 +200,6 @@ export default function App() {
         />
       )}
 
-      {/* Main Content Layout */}
       {activeTab === 'reports' ? (
         <main className="w-full flex-1">
           <PatientReportPrintView
@@ -180,7 +210,6 @@ export default function App() {
         </main>
       ) : (
         <div className="flex flex-1 max-w-[1280px] mx-auto w-full">
-          {/* Desktop Left Sidebar (All tabs open into new pages) */}
           <Sidebar
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -198,9 +227,7 @@ export default function App() {
             onLogout={handleLogout}
           />
 
-          {/* Dynamic Content View Area - Each tab renders its own dedicated page */}
           <main className="flex-1 md:pl-72 px-4 sm:px-6 md:px-8 py-6 pb-24 md:pb-12 w-full overflow-x-hidden">
-            {/* 1. Overview Summary Page */}
             {activeTab === 'overview' && (
               <OverviewView
                 patient={patient}
@@ -214,7 +241,6 @@ export default function App() {
               />
             )}
 
-            {/* 2. Genetic Risk (PRS) Page */}
             {activeTab === 'genetic' && (
               <GeneticRiskView
                 patient={patient}
@@ -225,7 +251,6 @@ export default function App() {
               />
             )}
 
-            {/* 3. Modifiable Factors Page */}
             {activeTab === 'modifiable' && (
               <ModifiableFactorsView
                 patient={patient}
@@ -237,7 +262,6 @@ export default function App() {
               />
             )}
 
-            {/* 4. Prevention Matrix Page */}
             {activeTab === 'prevention' && (
               <PreventionMatrixView
                 patient={patient}
@@ -248,7 +272,6 @@ export default function App() {
               />
             )}
 
-            {/* 5. Drug Testing Results Page */}
             {activeTab === 'drug-testing' && (
               <DrugTestingResultsView
                 patient={patient}
@@ -258,7 +281,6 @@ export default function App() {
               />
             )}
 
-            {/* 6. Health Data Input Page */}
             {activeTab === 'input' && (
               <ClinicalDataInput
                 patient={patient}
@@ -270,12 +292,10 @@ export default function App() {
         </div>
       )}
 
-      {/* Mobile Bottom Navigation */}
       {activeTab !== 'reports' && (
         <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
       )}
 
-      {/* Modals & Drawers */}
       <OrderTestModal
         isOpen={isOrderTestOpen}
         onClose={() => setIsOrderTestOpen(false)}
@@ -308,5 +328,19 @@ export default function App() {
         onClose={() => setInfoModalType(null)}
       />
     </div>
+  );
+
+  return (
+    <Routes>
+      <Route path="/" element={<LoginPage onLogin={handleLogin} onOpenModelTesting={() => navigate('/model-testing')} />} />
+
+      {Object.values(TAB_PATHS).map(path => (
+        <React.Fragment key={path}>
+          <Route path={path} element={dashboard} />
+        </React.Fragment>
+      ))}
+
+      <Route path="*" element={<Navigate to="/overview" replace />} />
+    </Routes>
   );
 }
