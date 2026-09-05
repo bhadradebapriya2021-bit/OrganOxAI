@@ -246,19 +246,10 @@ export const ModelTestingDashboard: React.FC<{ onExit: () => void }> = ({ onExit
                     ))}
                   </div>
 
-                  <dl className="grid grid-cols-2 gap-3 mt-6 pt-5 border-t border-[#D4D8D5] text-xs">
-                    <div><dt className="text-[#6F6D68]">Algorithm</dt><dd className="font-semibold mt-0.5">{result.model.type}</dd></div>
-                    <div><dt className="text-[#6F6D68]">Training rows</dt><dd className="font-semibold mt-0.5">{result.model.trainingRows.toLocaleString()}</dd></div>
-                    <div><dt className="text-[#6F6D68]">Dataset</dt><dd className="font-semibold mt-0.5 break-all">{result.model.sourceDataset}</dd></div>
-                    <div><dt className="text-[#6F6D68]">Classes</dt><dd className="font-semibold mt-0.5">{result.model.classCount}</dd></div>
-                  </dl>
-
                   {result.model.metrics && <div className="mt-4 rounded-xl bg-[#F7F8F7] border border-[#D4D8D5] p-4">
                     <div className="text-xs font-bold mb-2">Held-out evaluation ({result.model.trainingPercent}% train / {result.model.testPercent}% test)</div>
-                    <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="text-xs">
                       <span>Accuracy <strong>{(result.model.metrics.accuracy * 100).toFixed(1)}%</strong></span>
-                      <span>Macro F1 <strong>{(result.model.metrics.macroF1 * 100).toFixed(1)}%</strong></span>
-                      <span>Weighted F1 <strong>{(result.model.metrics.weightedF1 * 100).toFixed(1)}%</strong></span>
                     </div>
                   </div>}
 
@@ -278,10 +269,6 @@ export const ModelTestingDashboard: React.FC<{ onExit: () => void }> = ({ onExit
                     </div>
                   </div>
 
-                  <details className="mt-5 border border-[#D4D8D5] rounded-xl overflow-hidden">
-                    <summary className="cursor-pointer px-3.5 py-3 text-xs font-bold bg-[#F7F8F7]">Inspect raw API response</summary>
-                    <pre className="p-3.5 text-[11px] leading-relaxed overflow-auto max-h-64 bg-[#2F2E2B] text-[#F4F2EF]">{JSON.stringify(result, null, 2)}</pre>
-                  </details>
                 </div>
               )}
             </div>
