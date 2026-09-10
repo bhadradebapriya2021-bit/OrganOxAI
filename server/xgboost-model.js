@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const trained = JSON.parse(fs.readFileSync(path.join(currentDirectory, 'xgboost-model.json'), 'utf8'));
-const limits = { age: [0, 120], glucose: [20, 700], bloodPressure: [50, 260], bmi: [10, 80], oxygenSaturation: [50, 100], lengthOfStay: [0, 365], cholesterol: [50, 600], triglycerides: [20, 1500] };
+const limits = { age: [0, 120], glucose: [20, 700], bloodPressure: [50, 260], bmi: [10, 80], oxygenSaturation: [50, 100], lengthOfStay: [0, 365], cholesterol: [50, 600], triglycerides: [20, 1500], stressLevel: [-5, 20], sleepHours: [0, 24], smoking: [0, 1], alcohol: [0, 1] };
 
 function encode(input) {
   const features = Object.fromEntries(trained.featureColumns.map(name => [name, 0]));

@@ -43,7 +43,8 @@ try {
     body: JSON.stringify({
       model: 'xgboost-healthcare-risk', age: 58, gender: 'male', glucose: 142,
       bloodPressure: 152, bmi: 31.7, oxygenSaturation: 96, lengthOfStay: 2,
-      cholesterol: 246, triglycerides: 231,
+      cholesterol: 246, triglycerides: 231, stressLevel: 7, sleepHours: 6,
+      smoking: 1, alcohol: 1,
     }),
   });
   assert.equal(xgboostResponse.status, 200);

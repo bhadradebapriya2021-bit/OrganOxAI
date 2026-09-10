@@ -14,6 +14,10 @@ const CLINICAL_FIELDS = [
   ['lengthOfStay', 'Length of stay', 'days'],
   ['cholesterol', 'Total cholesterol', 'mg/dL'],
   ['triglycerides', 'Triglycerides', 'mg/dL'],
+  ['stressLevel', 'Stress level', 'score'],
+  ['sleepHours', 'Sleep duration', 'hours'],
+  ['smoking', 'Smoking', '0=no, 1=yes'],
+  ['alcohol', 'Alcohol use', '0=no, 1=yes'],
 ];
 
 function capWords(text, limit = TRANSCRIPT_WORD_LIMIT) {

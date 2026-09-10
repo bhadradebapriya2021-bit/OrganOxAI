@@ -22,6 +22,10 @@ interface ModelInput {
   lengthOfStay: number;
   cholesterol: number;
   triglycerides: number;
+  stressLevel: number;
+  sleepHours: number;
+  smoking: 0 | 1;
+  alcohol: 0 | 1;
 }
 
 interface PredictionResponse {
@@ -45,18 +49,30 @@ const SAMPLE_PROFILES: Array<{ name: string; description: string; values: ModelI
   {
     name: 'Baseline',
     description: 'Lower-risk synthetic profile',
-    values: { age: 36, gender: 'female', glucose: 94, bloodPressure: 118, bmi: 22.4, oxygenSaturation: 98, lengthOfStay: 0, cholesterol: 174, triglycerides: 98 },
+    values: { age: 36, gender: 'female', glucose: 94, bloodPressure: 118, bmi: 22.4, oxygenSaturation: 98, lengthOfStay: 0, cholesterol: 174, triglycerides: 98, stressLevel: 4, sleepHours: 7.5, smoking: 0, alcohol: 0 },
   },
   {
     name: 'Metabolic',
     description: 'Elevated metabolic markers',
-    values: { age: 58, gender: 'male', glucose: 142, bloodPressure: 152, bmi: 31.7, oxygenSaturation: 96, lengthOfStay: 2, cholesterol: 246, triglycerides: 231 },
+    values: { age: 58, gender: 'male', glucose: 142, bloodPressure: 152, bmi: 31.7, oxygenSaturation: 96, lengthOfStay: 2, cholesterol: 246, triglycerides: 231, stressLevel: 7, sleepHours: 6, smoking: 1, alcohol: 1 },
   },
   {
     name: 'Stress test',
     description: 'High-range synthetic inputs',
-    values: { age: 72, gender: 'male', glucose: 238, bloodPressure: 186, bmi: 34.8, oxygenSaturation: 89, lengthOfStay: 6, cholesterol: 285, triglycerides: 360 },
+    values: { age: 72, gender: 'male', glucose: 238, bloodPressure: 186, bmi: 34.8, oxygenSaturation: 89, lengthOfStay: 6, cholesterol: 285, triglycerides: 360, stressLevel: 10, sleepHours: 4, smoking: 1, alcohol: 1 },
   },
+];
+
+const XGBOOST_ADDED_FIELDS: Array<{
+  key: 'stressLevel' | 'sleepHours';
+  label: string;
+  unit: string;
+  minimum: number;
+  maximum: number;
+  step: number;
+}> = [
+  { key: 'stressLevel', label: 'Stress level', unit: 'dataset score', minimum: -5, maximum: 20, step: 0.1 },
+  { key: 'sleepHours', label: 'Sleep duration', unit: 'hours', minimum: 0, maximum: 24, step: 0.1 },
 ];
 
 const FIELD_CONFIG: Array<{
@@ -106,12 +122,13 @@ export const ModelTestingDashboard: React.FC<{ onExit: () => void }> = ({ onExit
     setError(null);
 
     try {
+      const { stressLevel, sleepHours, smoking, alcohol, ...gnbInputs } = form;
       const response = await fetch('/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(algorithm === 'xgboost'
           ? { model: 'xgboost-healthcare-risk', ...form }
-          : { model: 'gaussian-naive-bayes', ...form }),
+          : { model: 'gaussian-naive-bayes', ...gnbInputs }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || 'Prediction request failed.');
@@ -200,6 +217,28 @@ export const ModelTestingDashboard: React.FC<{ onExit: () => void }> = ({ onExit
                     <input type="number" required min={field.minimum} max={field.maximum} step={field.step || 1} value={form[field.key]} onChange={event => setForm(current => ({ ...current, [field.key]: Number(event.target.value) }))} className="mt-1.5 w-full bg-[#F7F8F7] border border-[#D4D8D5] rounded-xl px-3.5 py-2.5 text-sm text-[#41403C] focus:outline-none focus:ring-2 focus:ring-[#D08856]/40" />
                   </label>
                 ))}
+
+                {algorithm === 'xgboost' && XGBOOST_ADDED_FIELDS.map(field => (
+                  <label key={field.key} className="text-[12px] font-bold text-[#6F6D68] uppercase tracking-wide">
+                    {field.label} <span className="normal-case font-normal">({field.unit})</span>
+                    <input type="number" required min={field.minimum} max={field.maximum} step={field.step} value={form[field.key]} onChange={event => setForm(current => ({ ...current, [field.key]: Number(event.target.value) }))} className="mt-1.5 w-full bg-[#F7F8F7] border border-[#D4D8D5] rounded-xl px-3.5 py-2.5 text-sm text-[#41403C] focus:outline-none focus:ring-2 focus:ring-[#D08856]/40" />
+                  </label>
+                ))}
+
+                {algorithm === 'xgboost' && <>
+                  <label className="text-[12px] font-bold text-[#6F6D68] uppercase tracking-wide">
+                    Smoking
+                    <select value={form.smoking} onChange={event => setForm(current => ({ ...current, smoking: Number(event.target.value) as 0 | 1 }))} className="mt-1.5 w-full bg-[#F7F8F7] border border-[#D4D8D5] rounded-xl px-3.5 py-2.5 text-sm text-[#41403C]">
+                      <option value={0}>No</option><option value={1}>Yes</option>
+                    </select>
+                  </label>
+                  <label className="text-[12px] font-bold text-[#6F6D68] uppercase tracking-wide">
+                    Alcohol use
+                    <select value={form.alcohol} onChange={event => setForm(current => ({ ...current, alcohol: Number(event.target.value) as 0 | 1 }))} className="mt-1.5 w-full bg-[#F7F8F7] border border-[#D4D8D5] rounded-xl px-3.5 py-2.5 text-sm text-[#41403C]">
+                      <option value={0}>No</option><option value={1}>Yes</option>
+                    </select>
+                  </label>
+                </>}
               </div>
 
               <button type="submit" disabled={submitting || connection === 'offline'} className="mt-6 w-full rounded-xl bg-[#41403C] hover:bg-[#2F2E2B] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 px-4 font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors">
