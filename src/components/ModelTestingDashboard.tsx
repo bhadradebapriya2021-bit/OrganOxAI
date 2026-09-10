@@ -272,7 +272,7 @@ export const ModelTestingDashboard: React.FC<{ onExit: () => void }> = ({ onExit
                   </div>
 
                   <div className="space-y-4">
-                    {result.scores.map((item, index) => (
+                    {result.scores.filter(item => item.name.toLowerCase() !== 'healthy').map((item, index) => (
                       <div key={item.name}>
                         <div className="flex justify-between gap-4 text-sm mb-1.5">
                           <span className={index === 0 ? 'font-bold' : 'font-medium'}>{item.name}</span>
@@ -286,7 +286,7 @@ export const ModelTestingDashboard: React.FC<{ onExit: () => void }> = ({ onExit
                   </div>
 
                   {result.model.metrics && <div className="mt-4 rounded-xl bg-[#F7F8F7] border border-[#D4D8D5] p-4">
-                    <div className="text-xs font-bold mb-2">Held-out evaluation ({result.model.trainingPercent}% train / {result.model.testPercent}% test)</div>
+                    <div className="text-xs font-bold mb-2">Model performance</div>
                     <div className="text-xs">
                       <span>Accuracy <strong>{(result.model.metrics.accuracy * 100).toFixed(1)}%</strong></span>
                     </div>
