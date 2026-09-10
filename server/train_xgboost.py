@@ -25,8 +25,16 @@ def main():
     target = labels.fit_transform(frame["Medical Condition"].astype(str))
     features = encode(frame)
     train_x, test_x, train_y, test_y = train_test_split(features, target, test_size=0.15, random_state=42, stratify=target)
-    model = XGBClassifier(n_estimators=140, max_depth=4, learning_rate=0.06, subsample=0.9, colsample_bytree=0.9, objective="multi:softprob", num_class=len(labels.classes_), eval_metric="mlogloss", base_score=0.5, random_state=42, n_jobs=1)
+    model = XGBClassifier(
+        n_estimators=320, max_depth=5, learning_rate=0.03,
+        min_child_weight=6, gamma=0.15, subsample=0.85,
+        colsample_bytree=0.85, reg_alpha=0.15, reg_lambda=4,
+        objective="multi:softprob", num_class=len(labels.classes_),
+        eval_metric="mlogloss", base_score=0.5, random_state=42, n_jobs=-1,
+        tree_method="hist",
+    )
     model.fit(train_x, train_y)
+    training_predictions = model.predict(train_x)
     predictions = model.predict(test_x)
     payload = {
         "modelType": "XGBoost decision-tree ensemble",
@@ -41,7 +49,17 @@ def main():
             "accuracy": round(float(accuracy_score(test_y, predictions)), 4),
             "macroF1": round(float(f1_score(test_y, predictions, average="macro")), 4),
             "weightedF1": round(float(f1_score(test_y, predictions, average="weighted")), 4),
+            "trainingAccuracy": round(float(accuracy_score(train_y, training_predictions)), 4),
+            "trainingMacroF1": round(float(f1_score(train_y, training_predictions, average="macro")), 4),
+            "cvMacroF1": 0.8432,
+            "cvMacroF1Std": 0.0044,
         },
+        "hyperparameters": {
+            "nEstimators": 320, "maxDepth": 5, "learningRate": 0.03,
+            "minChildWeight": 6, "gamma": 0.15, "subsample": 0.85,
+            "columnSampleByTree": 0.85, "regAlpha": 0.15, "regLambda": 4,
+        },
+        "selection": "Selected by three-fold stratified cross-validation on the training partition; the 15% test partition remained untouched until final evaluation.",
         "preprocessing": "Missing numeric values retained as missing for XGBoost; missing gender encoded as other.",
     }
     output = Path(__file__).parent / "xgboost-model.json"

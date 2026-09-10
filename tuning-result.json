@@ -1,0 +1,21 @@
+{
+  "best": {
+    "candidate": 6,
+    "cvMacroF1Mean": 0.8431522317437463,
+    "cvMacroF1Std": 0.004416019122979355,
+    "n_estimators": 320,
+    "max_depth": 5,
+    "learning_rate": 0.03,
+    "min_child_weight": 6,
+    "gamma": 0.15,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "reg_alpha": 0.15,
+    "reg_lambda": 4
+  },
+  "trainAccuracy": 0.874002306805075,
+  "trainMacroF1": 0.8659875105714289,
+  "testAccuracy": 0.8520261437908496,
+  "testMacroF1": 0.8434969337290624,
+  "testWeightedF1": 0.8496273641367256
+}

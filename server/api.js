@@ -2,7 +2,19 @@ import express from 'express';
 import { predict } from './model.js';
 import { predictXgboost, xgboostMetadata } from './xgboost-model.js';
 
-const TRANSCRIPT_WORD_LIMIT = 80;
+const TRANSCRIPT_WORD_LIMIT = 120;
+
+const CLINICAL_FIELDS = [
+  ['age', 'Age', 'years'],
+  ['gender', 'Gender', ''],
+  ['glucose', 'Glucose', 'mg/dL'],
+  ['bloodPressure', 'Systolic blood pressure', 'mmHg'],
+  ['bmi', 'BMI', 'kg/m²'],
+  ['oxygenSaturation', 'Oxygen saturation', '%'],
+  ['lengthOfStay', 'Length of stay', 'days'],
+  ['cholesterol', 'Total cholesterol', 'mg/dL'],
+  ['triglycerides', 'Triglycerides', 'mg/dL'],
+];
 
 function capWords(text, limit = TRANSCRIPT_WORD_LIMIT) {
   const words = text.trim().split(/\s+/).filter(Boolean);
@@ -19,7 +31,14 @@ function extractOutputText(response) {
     .join('\n');
 }
 
-async function createAiTranscript(scores, enabled) {
+function summarizeClinicalInputs(input) {
+  return CLINICAL_FIELDS
+    .filter(([key]) => input[key] !== undefined)
+    .map(([key, label, unit]) => `${label}: ${input[key]}${unit ? ` ${unit}` : ''}`)
+    .join(', ');
+}
+
+async function createAiTranscript(scores, input, enabled) {
   if (!enabled) {
     return {
       aiTranscript: 'AI interpretation is disabled for this test run.',
@@ -29,12 +48,13 @@ async function createAiTranscript(scores, enabled) {
 
   if (!process.env.OPENAI_API_KEY) {
     return {
-      aiTranscript: 'Add OPENAI_API_KEY to the server .env file to enable the 80-word AI interpretation.',
+      aiTranscript: 'Add OPENAI_API_KEY to the server .env file to enable the 120-word AI risk explanation.',
       aiTranscriptStatus: 'not_configured',
     };
   }
 
   const scoreSummary = scores.map(item => `${item.name}: ${item.score}%`).join(', ');
+  const clinicalSummary = summarizeClinicalInputs(input);
 
   try {
     const apiResponse = await fetch('https://api.openai.com/v1/responses', {
@@ -46,10 +66,10 @@ async function createAiTranscript(scores, enabled) {
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || 'gpt-5.6-luna',
         store: false,
-        max_output_tokens: 180,
+        max_output_tokens: 300,
         text: { verbosity: 'low' },
-        instructions: 'Write one plain-language paragraph of no more than 80 words. Summarize the highest classifier labels first, mention meaningful competing labels, and explain that scores are dataset-label confidence rather than diagnostic probabilities. Do not diagnose, prescribe treatment, or claim clinical validation. Recommend professional evaluation only when the pattern warrants it.',
-        input: `Classifier scores: ${scoreSummary}`,
+        instructions: `Write one plain-language clinical-risk explanation of no more than ${TRANSCRIPT_WORD_LIMIT} words. Do not merely repeat or narrate the classifier scores. Explain the main health issue suggested by the leading label, identify which supplied measurements appear concerning, and briefly describe possible complications if those abnormalities are persistent or unmanaged. State a cautious overall concern level (low, moderate, or high) based on the measurements, not the classifier percentage. Clearly say this is screening support, not a diagnosis. Do not prescribe medication or claim clinical validation. Recommend routine, prompt, or urgent professional assessment proportionately; flag emergency care only for genuinely dangerous supplied measurements.`,
+        input: `Model: ${input.model || 'gaussian-naive-bayes'}\nClinical measurements: ${clinicalSummary}\nClassifier label scores: ${scoreSummary}`,
       }),
       signal: AbortSignal.timeout(20000),
     });
@@ -90,7 +110,7 @@ export function createApiRouter({ enableAi = true } = {}) {
       const prediction = request.body.model === 'xgboost-healthcare-risk'
         ? predictXgboost(request.body)
         : predict(request.body);
-      const transcript = await createAiTranscript(prediction.scores, enableAi);
+      const transcript = await createAiTranscript(prediction.scores, request.body, enableAi);
       response.set('Cache-Control', 'no-store').json({ ...prediction, ...transcript });
     } catch (error) {
       response.status(400).json({
